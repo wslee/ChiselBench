@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export BENCHMARK_NAME=sort-8.16.c
+export BENCHMARK_NAME=sort-8.16
 export BENCHMARK_DIR=$CHISEL_BENCHMARK_HOME/benchmark/$BENCHMARK_NAME
 export SRC=$BENCHMARK_DIR/$BENCHMARK_NAME.c
 export ORIGIN_BIN=$BENCHMARK_DIR/$BENCHMARK_NAME.origin
@@ -10,14 +10,16 @@ export LOG=$BENCHMARK_DIR/log.txt
 
 export BENCHMARK_CFLAGS="-lpthread"
 
+source $CHISEL_BENCHMARK_HOME/benchmark/test-base.sh
+
 function clean() {
   rm -rf $LOG $REDUCED_BIN file temp* gt-*
   return 0
 }
 
 function run() {
-  timeout 0.4 $REDUCED_BIN $1 $input >&$LOG || exit 1
-  $ORIGIN_BIN $1 $input >&temp2
+  timeout $TIMEOUT $REDUCED_BIN $1 $2 >&$LOG || exit 1
+  $ORIGIN_BIN $1 $2 >&temp2
   diff -q $LOG temp2 || exit 1
 }
 
@@ -28,11 +30,11 @@ function run_disaster() {
 
 function desired() {
   for input in $(ls input/*); do
-    run "" || exit 1
-    run "-r" || exit 1
-    run "-s" || exit 1
-    run "-u" || exit 1
-    run "-z" || exit 1
+    run "" $input || exit 1
+    run "-r" $input || exit 1
+    run "-s" $input || exit 1
+    run "-u" $input || exit 1
+    run "-z" $input || exit 1
   done
   return 0
 }
@@ -127,3 +129,4 @@ function undesired() {
   done
   return 0
 }
+main
